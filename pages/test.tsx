@@ -1,24 +1,25 @@
 import {Button} from "../@/components/ui/button"
 import {CardTitle, CardHeader, CardContent, CardFooter, Card} from "../@/components/ui/card"
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
+import CardComponents from "../components/card";
+import {log} from "util";
 
-type status = "todo" | "doing" | "done";
-type type = "TODO" | "DOING" | "DONE";
+export type status = "todo" | "doing" | "done";
+export type type = "TODO" | "DOING" | "DONE";
 
-interface CardInterface {
-    id: number;
-    title: string;
-    visible: boolean;
-    listElement: EventInterface[];
-}
-
-interface EventInterface {
+export interface EventInterface {
     id: number, //unique id
     type: type,
     title: string;
     description: string;
     comment?: string;
     state: status;
+}
+export interface CardInterface {
+    id: number;
+    title: string;
+    visible: boolean;
+    listElement: EventInterface[];
 }
 
 export default function Component() {
@@ -27,59 +28,47 @@ export default function Component() {
             id: 1,
             title: "TODO",
             visible: true,
-            listElement: []
+            listElement: [
+                {
+                    id: 1.1,
+                    type: "TODO",
+                    title: "titolo prova",
+                    description: "",
+                    state: "todo"
+                },
+            ]
         },
         {
             id: 2,
             title: "DOING",
             visible: true,
-            listElement: []
+            listElement: [
+                {
+                    id: 2.1,
+                    type: "DOING",
+                    title: "titolo prova doing",
+                    description: "",
+                    state: "doing"
+                },
+            ]
         },
         {
             id: 3,
             title: "DONE",
             visible: true,
-            listElement: []
+            listElement: [
+                {
+                    id: 3.1,
+                    type: "DONE",
+                    title: "titolo prova done",
+                    description: "",
+                    state: "done"
+                }
+            ]
         }
 
     ])
-    const [eventList, setEventList] = useState<EventInterface[]>([
-        {
-            id: 1.1,
-            type: "TODO",
-            title: "titolo prova",
-            description: "",
-            state: "todo"
-        },
-        {
-            id: 1.2,
-            type: "DOING",
-            title: "titolo prova doing",
-            description: "",
-            state: "doing"
-        },
-        {
-            id: 1.3,
-            type: "DONE",
-            title: "titolo prova done",
-            description: "",
-            state: "done"
-        }
-    ])
 
-    useEffect(() => {
-        const updatedCardList = [...cardList];
-
-        eventList.forEach((event) => {
-            const cardItem = updatedCardList.find((card) => card.title === event.type);
-
-            if (cardItem) {
-                cardItem.listElement.push(event);
-            }
-        });
-
-        setCardList(updatedCardList);
-    }, [eventList]);
 
     return (
         <section className="h-screen w-full bg-gray-100 dark:bg-gray-800">
@@ -108,25 +97,20 @@ export default function Component() {
                     <Button className="text-black">Sign Up</Button>
                 </div>
             </header>
-            <main className="p-6 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" draggable="true">
-                {cardList.map((card, cardIndex) => {
+            <main className="p-6 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {cardList && cardList.map((card) => {
                     return (
-                        <>
                             <Card key={card.id}>
                                 <CardHeader>
                                     <CardTitle className="text-black">{card.title}</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-2">
-                                    {card.listElement.map((eCard) => {
+                                    {card.listElement.map((eCard, eIndex) => {
                                         return (
-                                            <>
-                                                <div key={eCard.id}
-                                                     className="p-4 border rounded-md bg-white dark:bg-gray-900"
-                                                     draggable="true">
-                                                    <h3 className="font-medium text-gray-700 dark:text-gray-200">{eCard.title}</h3>
-                                                    <p className="text-sm text-gray-500 dark:text-gray-400">{eCard.description}</p>
-                                                </div>
-                                            </>
+                                            <CardComponents
+                                                key={eCard.id}
+                                                {...eCard}
+                                            />
                                         )
                                     })}
                                 </CardContent>
@@ -134,7 +118,6 @@ export default function Component() {
                                     <Button className="text-black" variant="secondary" size="sm">Add Card</Button>
                                 </CardFooter>
                             </Card>
-                        </>
                     )
                 })}
             </main>
