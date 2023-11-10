@@ -15,10 +15,17 @@ export interface CardInterface {
 }
 export interface SingleEventInterface {
     eCard: EventInterface;
-    moveCard: (item: EventInterface, destinationCard: CardInterface) => void;
+    moveCard?: (item: EventInterface, destinationCard: CardInterface) => void;
+    orderCardList?: any
 }
 export interface CardListInterface {
     card: CardInterface,
     moveCard: (item: EventInterface, destinationCard: CardInterface) => void,
-    cardList: CardInterface[]
+    cardList: CardInterface[],
+    orderCardList?: any
+}
+
+export interface ReorderCardListInterface {
+    valueHover: EventInterface,
+    card: CardInterface
 }

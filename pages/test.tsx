@@ -1,10 +1,15 @@
 import {Button} from "../@/components/ui/button"
-import {CardTitle, CardHeader, CardContent, Card} from "../@/components/ui/card"
+import {Card, CardContent, CardHeader, CardTitle} from "../@/components/ui/card"
 import React, {useState} from "react";
 import {HTML5Backend} from 'react-dnd-html5-backend'
 import {DndProvider, useDrag, useDrop} from 'react-dnd'
-import { Input } from "../@/components/ui/input"
-import {CardInterface, CardListInterface, EventInterface, SingleEventInterface} from "../interface/interface";
+import {Input} from "../@/components/ui/input"
+import {
+    CardInterface,
+    CardListInterface,
+    EventInterface,
+    SingleEventInterface
+} from "../interface/interface";
 
 /**
  * Card Item
@@ -13,40 +18,41 @@ import {CardInterface, CardListInterface, EventInterface, SingleEventInterface} 
  * @param cardList
  * @constructor
  */
-const CardItem: React.FC<CardListInterface> =
-    ({card, moveCard, cardList}) => {
+const CardItem: React.FC<CardListInterface> = ({card, moveCard, cardList, orderCardList}) => {
 
-    const [collectedProps, drop] = useDrop(() => ({
-        accept: "CARD_COMPONENT",
-        item: card,
-        drop: (valueHover: { eCard: EventInterface }) => {
-            const destinationCard = card;
-            moveCard(valueHover.eCard, destinationCard)
+        const [collectedProps, drop] = useDrop(() => ({
+            accept: "CARD_COMPONENT",
+            item: card,
+            drop: (valueHover: { eCard: EventInterface }) => {
+                if (valueHover.eCard.type !== card.type) moveCard(valueHover.eCard, card)
+                if (valueHover.eCard.type === card.type) {
+                    orderCardList(card, valueHover.eCard);
+                }
+            }
+        }))
+
+        function addEvent(e: React.KeyboardEvent<HTMLInputElement>) {
+            console.log(e.currentTarget.value)
         }
-    }))
 
-    function addEvent(e: React.KeyboardEvent<HTMLInputElement>) {
-        console.log(e.currentTarget.value)
-    }
-
-    return (
-        <Card ref={drop}>
-            <CardHeader>
-                <CardTitle className="text-black">{card.title}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-                <Input className={"h-14 p-2"} placeholder={" Add Event"} onKeyDown={(e)=>addEvent(e)}></Input>
-                {card.listElement.map((eCard) => (
-                    <EventItem
-                        key={eCard.id}
-                        eCard={eCard}
-                        moveCard={moveCard}
-                    />
-                ))}
-            </CardContent>
-        </Card>
-    );
-};
+        return (
+            <Card ref={drop}>
+                <CardHeader>
+                    <CardTitle className="text-black">{card.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                    <Input className={"h-14 p-2"} placeholder={" Add Event"} onKeyDown={(e) => addEvent(e)}></Input>
+                    {card.listElement.map((eCard) => (
+                        <EventItem
+                            key={eCard.id}
+                            eCard={eCard}
+                            moveCard={moveCard}
+                        />
+                    ))}
+                </CardContent>
+            </Card>
+        );
+    };
 
 
 /**
@@ -55,8 +61,7 @@ const CardItem: React.FC<CardListInterface> =
  * @param moveCard
  * @constructor
  */
-const EventItem: React.FC<SingleEventInterface> =
-    ({eCard, moveCard}) => {
+const EventItem: React.FC<SingleEventInterface> = ({eCard}) => {
         const [{isDragging}, drag] = useDrag({
             type: 'CARD_COMPONENT',
             item: {eCard},
@@ -66,13 +71,14 @@ const EventItem: React.FC<SingleEventInterface> =
         });
 
         return (
-            <div ref={drag} style={{opacity: isDragging ? 0.5 : 1, scale: 0.3 }} className="p-4 border rounded-md bg-white dark:bg-gray-900">
-                <h3 className="font-medium text-gray-700 dark:text-gray-200">{eCard.title}</h3>
+            <div ref={drag}
+                 style={{opacity: isDragging ? 0.5 : 1, scale: 0.3}}
+                 className="p-4 border rounded-md bg-white dark:bg-gray-900">
+                <h3 className="font-medium text-gray-700 dark:text-gray-200">{eCard.title} {eCard.type}</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">{eCard.description}</p>
             </div>
         );
     };
-
 
 export default function Component() {
     const [cardList, setCardList] = useState<CardInterface[]>([
@@ -129,8 +135,6 @@ export default function Component() {
      * @returns {void}
      */
     const moveCard = (item: EventInterface, destinationCard: CardInterface): void => {
-        console.log(item,destinationCard)
-        //FIXME please!
         const newCardList = [...cardList];
 
         // Determine the sourceCardIndex based on the type of the destination card
@@ -138,17 +142,20 @@ export default function Component() {
         const cardIndex = newCardList.findIndex(card => card === destinationCard);
 
         if (cardIndex !== -1 && sourceCardIndex !== -1) {
-            // Change the type of the item to the type of the destination card
-            const updatedItem = { ...item, type: newCardList[sourceCardIndex].type };
-
-            // Push the updated item to the destinationCard array
-            newCardList[cardIndex].listElement.push(updatedItem);
-
             // Remove old items from the origin-array
             const index = newCardList[sourceCardIndex].listElement.findIndex(event => event.id === item.id);
             if (index !== -1) {
                 newCardList[sourceCardIndex].listElement.splice(index, 1);
             }
+            // Push the updated item to the destinationCard array and update the type
+            let updatedElement: EventInterface = {
+                id: item.id,
+                title: item.title,
+                type: destinationCard.type,
+                description: item.description
+            }
+            newCardList[cardIndex].listElement.push(updatedElement);
+
             // Update the state
             setCardList(newCardList);
         } else if (cardIndex === -1) {
@@ -157,6 +164,36 @@ export default function Component() {
             console.error('Invalid move: Source and destination cards are the same.');
         }
     };
+    /**
+     * Update the order of the events
+     * FIXME: to improve
+     * @param card
+     * @param element
+     */
+    const orderCardList = (card: CardInterface, element: EventInterface): void => {
+        const sourceCardIndex = cardList.findIndex((c) => c.type === card.type);
+
+        if (sourceCardIndex !== -1) {
+            const sourceCard = cardList[sourceCardIndex];
+
+            const sourceIndex = sourceCard.listElement.findIndex((e) => e.id === element.id);
+            const destinationIndex = sourceCard.listElement.findIndex((e) => e.id === card.id);
+
+            if (sourceIndex < 0 || sourceIndex >= sourceCard.listElement.length) {
+                // Handle error
+                return;
+            }
+
+            if (sourceIndex !== destinationIndex) {
+                const updatedList = [...cardList];
+                const [movedItem] = updatedList[sourceCardIndex].listElement.splice(sourceIndex, 1);
+
+                updatedList[sourceCardIndex].listElement.splice(destinationIndex, 0, movedItem);
+
+                setCardList(updatedList);
+            }
+        }
+    }
 
 
     return (
@@ -192,6 +229,7 @@ export default function Component() {
                         <CardItem key={card.id}
                                   card={card}
                                   moveCard={moveCard}
+                                  orderCardList={orderCardList}
                                   cardList={cardList}/>
                     ))}
                 </main>
