@@ -1,10 +1,11 @@
 import {Button} from "../@/components/ui/button"
-import {CardTitle, CardHeader, CardContent, CardFooter, Card} from "../@/components/ui/card"
+import {CardTitle, CardHeader, CardContent, Card} from "../@/components/ui/card"
 import React, {useState} from "react";
 import {HTML5Backend} from 'react-dnd-html5-backend'
 import {DndProvider, useDrag, useDrop} from 'react-dnd'
+import { Input } from "../@/components/ui/input"
+import { Label } from "../@/components/ui/label"
 
-export type status = "todo" | "doing" | "done";
 export type type = "TODO" | "DOING" | "DONE";
 export interface EventInterface {
     id: number, //unique id
@@ -12,7 +13,6 @@ export interface EventInterface {
     title: string;
     description: string;
     comment?: string;
-    state: status;
 }
 export interface CardInterface {
     id: number;
@@ -43,13 +43,17 @@ const CardItem: React.FC<CardListInterface> = ({card, moveCard, cardList}) => {
         }
     }))
 
+    function addEvent(e: React.KeyboardEvent<HTMLInputElement>) {
+        console.log(e.currentTarget.value)
+    }
+
     return (
         <Card ref={drop}>
             <CardHeader>
                 <CardTitle className="text-black">{card.title}</CardTitle>
-                <input title={"insert Event"}/>
             </CardHeader>
             <CardContent className="space-y-2">
+                <Input className={"h-14 p-2"} placeholder={" Add Event"} onKeyDown={(e)=>addEvent(e)}></Input>
                 {card.listElement.map((eCard) => (
                     <DraggableCardComponent
                         key={eCard.id}
@@ -58,11 +62,6 @@ const CardItem: React.FC<CardListInterface> = ({card, moveCard, cardList}) => {
                     />
                 ))}
             </CardContent>
-            {/*<CardFooter>*/}
-            {/*    <Button className="text-black" variant="secondary" size="sm">*/}
-            {/*        Add Event*/}
-            {/*    </Button>*/}
-            {/*</CardFooter>*/}
         </Card>
     );
 };
@@ -98,7 +97,6 @@ export default function Component() {
                     type: "TODO",
                     title: "titolo prova",
                     description: "",
-                    state: "todo"
                 },
             ]
         },
@@ -113,7 +111,6 @@ export default function Component() {
                     type: "DOING",
                     title: "titolo prova doing",
                     description: "",
-                    state: "doing"
                 },
             ]
         },
@@ -128,7 +125,6 @@ export default function Component() {
                     type: "DONE",
                     title: "titolo prova done",
                     description: "",
-                    state: "done"
                 }
             ]
         }
