@@ -4,35 +4,17 @@ import React, {useState} from "react";
 import {HTML5Backend} from 'react-dnd-html5-backend'
 import {DndProvider, useDrag, useDrop} from 'react-dnd'
 import { Input } from "../@/components/ui/input"
-import { Label } from "../@/components/ui/label"
+import {CardInterface, CardListInterface, EventInterface, SingleEventInterface} from "../interface/interface";
 
-export type type = "TODO" | "DOING" | "DONE";
-export interface EventInterface {
-    id: number, //unique id
-    type: type,
-    title: string;
-    description: string;
-    comment?: string;
-}
-export interface CardInterface {
-    id: number;
-    title: string;
-    type: type,
-    visible: boolean;
-    listElement: EventInterface[];
-}
-export interface SingleEventInterface {
-    eCard: EventInterface;
-    moveCard: (item: EventInterface, destinationCard: CardInterface) => void;
-}
-export interface CardListInterface {
-    card: CardInterface,
-    moveCard: (item: EventInterface, destinationCard: CardInterface) => void,
-    cardList: CardInterface[]
-}
-
-
-const CardItem: React.FC<CardListInterface> = ({card, moveCard, cardList}) => {
+/**
+ * Card Item
+ * @param card
+ * @param moveCard
+ * @param cardList
+ * @constructor
+ */
+const CardItem: React.FC<CardListInterface> =
+    ({card, moveCard, cardList}) => {
 
     const [collectedProps, drop] = useDrop(() => ({
         accept: "CARD_COMPONENT",
@@ -55,7 +37,7 @@ const CardItem: React.FC<CardListInterface> = ({card, moveCard, cardList}) => {
             <CardContent className="space-y-2">
                 <Input className={"h-14 p-2"} placeholder={" Add Event"} onKeyDown={(e)=>addEvent(e)}></Input>
                 {card.listElement.map((eCard) => (
-                    <DraggableCardComponent
+                    <EventItem
                         key={eCard.id}
                         eCard={eCard}
                         moveCard={moveCard}
@@ -66,7 +48,14 @@ const CardItem: React.FC<CardListInterface> = ({card, moveCard, cardList}) => {
     );
 };
 
-const DraggableCardComponent: React.FC<SingleEventInterface> =
+
+/**
+ * Event Item
+ * @param eCard
+ * @param moveCard
+ * @constructor
+ */
+const EventItem: React.FC<SingleEventInterface> =
     ({eCard, moveCard}) => {
         const [{isDragging}, drag] = useDrag({
             type: 'CARD_COMPONENT',
@@ -83,6 +72,7 @@ const DraggableCardComponent: React.FC<SingleEventInterface> =
             </div>
         );
     };
+
 
 export default function Component() {
     const [cardList, setCardList] = useState<CardInterface[]>([
