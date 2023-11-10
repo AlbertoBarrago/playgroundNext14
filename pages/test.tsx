@@ -3,7 +3,6 @@ import {CardTitle, CardHeader, CardContent, CardFooter, Card} from "../@/compone
 import React, {useState} from "react";
 import {HTML5Backend} from 'react-dnd-html5-backend'
 import {DndProvider, useDrag, useDrop} from 'react-dnd'
-import {types} from "util";
 
 export type status = "todo" | "doing" | "done";
 export type type = "TODO" | "DOING" | "DONE";
@@ -18,6 +17,7 @@ export interface EventInterface {
 export interface CardInterface {
     id: number;
     title: string;
+    type: type,
     visible: boolean;
     listElement: EventInterface[];
 }
@@ -38,9 +38,7 @@ const CardItem: React.FC<CardListInterface> = ({card, moveCard, cardList}) => {
         accept: "CARD_COMPONENT",
         item: card,
         drop: (valueHover: { eCard: EventInterface }) => {
-            const hoverEventType = valueHover.eCard.type;
             const destinationCard = card;
-            const destinationCardType = destinationCard.title;
             moveCard(valueHover.eCard, destinationCard)
         }
     }))
@@ -49,6 +47,7 @@ const CardItem: React.FC<CardListInterface> = ({card, moveCard, cardList}) => {
         <Card ref={drop}>
             <CardHeader>
                 <CardTitle className="text-black">{card.title}</CardTitle>
+                <input title={"insert Event"}/>
             </CardHeader>
             <CardContent className="space-y-2">
                 {card.listElement.map((eCard) => (
@@ -59,11 +58,11 @@ const CardItem: React.FC<CardListInterface> = ({card, moveCard, cardList}) => {
                     />
                 ))}
             </CardContent>
-            <CardFooter>
-                <Button className="text-black" variant="secondary" size="sm">
-                    Add Event
-                </Button>
-            </CardFooter>
+            {/*<CardFooter>*/}
+            {/*    <Button className="text-black" variant="secondary" size="sm">*/}
+            {/*        Add Event*/}
+            {/*    </Button>*/}
+            {/*</CardFooter>*/}
         </Card>
     );
 };
@@ -91,6 +90,7 @@ export default function Component() {
         {
             id: 1,
             title: "TODO",
+            type: "TODO",
             visible: true,
             listElement: [
                 {
@@ -105,6 +105,7 @@ export default function Component() {
         {
             id: 2,
             title: "DOING",
+            type: "DOING",
             visible: true,
             listElement: [
                 {
@@ -119,6 +120,7 @@ export default function Component() {
         {
             id: 3,
             title: "DONE",
+            type: "DONE",
             visible: true,
             listElement: [
                 {
@@ -141,22 +143,26 @@ export default function Component() {
      * @returns {void}
      */
     const moveCard = (item: EventInterface, destinationCard: CardInterface): void => {
+        console.log(item,destinationCard)
+        //FIXME please!
         const newCardList = [...cardList];
 
         // Determine the sourceCardIndex based on the type of the destination card
-        const sourceCardIndex = newCardList.findIndex(card => card.title === item.type);
+        const sourceCardIndex = newCardList.findIndex(card => card.type === item.type);
         const cardIndex = newCardList.findIndex(card => card === destinationCard);
 
-        if (cardIndex !== -1 && sourceCardIndex !== -1 && cardIndex !== sourceCardIndex) {
+        if (cardIndex !== -1 && sourceCardIndex !== -1) {
             // Change the type of the item to the type of the destination card
-            const updatedItem = { ...item };
+            const updatedItem = { ...item, type: newCardList[sourceCardIndex].type };
 
             // Push the updated item to the destinationCard array
             newCardList[cardIndex].listElement.push(updatedItem);
 
             // Remove old items from the origin-array
-            newCardList[sourceCardIndex].listElement = newCardList[sourceCardIndex].listElement.filter(event => event.id !== item.id);
-
+            const index = newCardList[sourceCardIndex].listElement.findIndex(event => event.id === item.id);
+            if (index !== -1) {
+                newCardList[sourceCardIndex].listElement.splice(index, 1);
+            }
             // Update the state
             setCardList(newCardList);
         } else if (cardIndex === -1) {
