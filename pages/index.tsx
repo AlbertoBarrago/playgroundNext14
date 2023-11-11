@@ -11,7 +11,6 @@ import {
     EventInterface,
     SingleEventInterface
 } from "../interface/interface";
-import {useAppState} from "../context/Context";
 import {useTheme} from "next-themes";
 
 /**
@@ -34,7 +33,7 @@ const CardItem: React.FC<CardListInterface> = ({card, moveCard, cardList, orderC
         }
     }))
 
-    function addEvent(e: React.KeyboardEvent<HTMLInputElement>) {
+    const addEvent = (e: React.KeyboardEvent<HTMLInputElement>) => {
         console.log(e.currentTarget.value)
     }
 
@@ -77,7 +76,7 @@ const EventItem: React.FC<SingleEventInterface> = ({eCard}) => {
         <div ref={drag}
              style={{opacity: isDragging ? 0.5 : 1, scale: 0.3}}
              className="p-4 border rounded-md bg-white dark:bg-gray-900">
-            <h3 className="font-medium text-gray-700 dark:text-gray-200">{eCard.title} {eCard.type}</h3>
+            <h3 className="font-medium text-gray-700 dark:text-gray-200">{eCard.title}</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">{eCard.description}</p>
         </div>
     );
@@ -185,8 +184,7 @@ export default function Home() {
             const destinationIndex = sourceCard.listElement.findIndex((e) => e.id === card.id);
 
             if (sourceIndex < 0 || sourceIndex >= sourceCard.listElement.length) {
-                // Handle error
-                return;
+                throw new Error('Invalid operation');
             }
 
             if (sourceIndex !== destinationIndex) {
@@ -227,8 +225,8 @@ export default function Home() {
                     }}> {theme === "light" ? <Sun/> : <Moon/>} </Button>
                 </div>
                 <div className="flex items-center space-x-2">
-                    <Button variant="ghost">Sign In</Button>
-                    <Button>Sign Up</Button>
+                    {/*<Button variant="ghost">Sign In</Button>*/}
+                    {/*<Button>Sign Up</Button>*/}
                 </div>
             </header>
             <section className="h-screen w-full bg-gray-100 dark:bg-gray-800">
