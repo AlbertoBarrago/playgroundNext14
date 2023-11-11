@@ -1,3 +1,5 @@
+import {Dispatch, SetStateAction} from "react";
+
 export type type = "TODO" | "DOING" | "DONE";
 export interface EventInterface {
     id: number, //unique id
@@ -20,9 +22,8 @@ export interface SingleEventInterface {
 }
 export interface CardListInterface {
     card: CardInterface,
-    moveCard: (item: EventInterface, destinationCard: CardInterface) => void,
     cardList: CardInterface[],
-    orderCardList?: any
+    setCardList?: Dispatch<SetStateAction<CardInterface[]>>
 }
 
 export interface ReorderCardListInterface {

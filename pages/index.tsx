@@ -3,7 +3,7 @@ import {Card, CardContent, CardHeader, CardTitle} from "../@/components/ui/card"
 import React, {useState} from "react";
 import {HTML5Backend} from 'react-dnd-html5-backend'
 import {DndProvider, useDrag, useDrop} from 'react-dnd'
-import { Moon, Sun } from "lucide-react"
+import {Moon, Sun} from "lucide-react"
 import {Input} from "../@/components/ui/input"
 import {
     CardInterface,
@@ -12,23 +12,28 @@ import {
     SingleEventInterface
 } from "../interface/interface";
 import {useTheme} from "next-themes";
+import {initEvent} from "../mock/mock";
+import {moveCard, orderCardList} from "../service/utils";
 
 /**
  * Card Item
  * @param card
  * @param moveCard
  * @param cardList
+ * @param orderCardList
  * @constructor
  */
-const CardItem: React.FC<CardListInterface> = ({card, moveCard, cardList, orderCardList}) => {
+const CardItem: React.FC<CardListInterface> = ({card, setCardList, cardList}) => {
 
-    const [collectedProps, drop] = useDrop(() => ({
+    const [, drop] = useDrop(() => ({
         accept: "CARD_COMPONENT",
         item: card,
         drop: (valueHover: { eCard: EventInterface }) => {
-            if (valueHover.eCard.type !== card.type) moveCard(valueHover.eCard, card)
+            if (valueHover.eCard.type !== card.type) {
+                moveCard(valueHover.eCard, card, cardList, setCardList)
+            }
             if (valueHover.eCard.type === card.type) {
-                orderCardList(card, valueHover.eCard);
+                orderCardList(card, valueHover.eCard, cardList, setCardList);
             }
         }
     }))
@@ -48,7 +53,6 @@ const CardItem: React.FC<CardListInterface> = ({card, moveCard, cardList, orderC
                     <EventItem
                         key={eCard.id}
                         eCard={eCard}
-                        moveCard={moveCard}
                     />
                 ))}
             </CardContent>
@@ -83,121 +87,8 @@ const EventItem: React.FC<SingleEventInterface> = ({eCard}) => {
 };
 
 export default function Home() {
-    const [cardList, setCardList] = useState<CardInterface[]>([
-        {
-            id: 1,
-            title: "TODO",
-            type: "TODO",
-            visible: true,
-            listElement: [
-                {
-                    id: 1.1,
-                    type: "TODO",
-                    title: "titolo prova",
-                    description: "",
-                },
-            ]
-        },
-        {
-            id: 2,
-            title: "DOING",
-            type: "DOING",
-            visible: true,
-            listElement: [
-                {
-                    id: 1.2,
-                    type: "DOING",
-                    title: "titolo prova doing",
-                    description: "",
-                },
-            ]
-        },
-        {
-            id: 3,
-            title: "DONE",
-            type: "DONE",
-            visible: true,
-            listElement: [
-                {
-                    id: 1.3,
-                    type: "DONE",
-                    title: "titolo prova done",
-                    description: "",
-                }
-            ]
-        }
-    ])
-    const { setTheme, theme } = useTheme()
-
-
-    /**
-     * Moves an item to a destination card in a card list.
-     *
-     * @param {EventInterface} item - The item to be moved.
-     * @param {CardInterface} destinationCard - The destination card where the item will be moved to.
-     *
-     * @returns {void}
-     */
-    const moveCard = (item: EventInterface, destinationCard: CardInterface): void => {
-        const newCardList = [...cardList];
-
-        // Determine the sourceCardIndex based on the type of the destination card
-        const sourceCardIndex = newCardList.findIndex(card => card.type === item.type);
-        const cardIndex = newCardList.findIndex(card => card === destinationCard);
-
-        if (cardIndex !== -1 && sourceCardIndex !== -1) {
-            // Remove old items from the origin-array
-            const index = newCardList[sourceCardIndex].listElement.findIndex(event => event.id === item.id);
-            if (index !== -1) {
-                newCardList[sourceCardIndex].listElement.splice(index, 1);
-            }
-            // Push the updated item to the destinationCard array and update the type
-            let updatedElement: EventInterface = {
-                id: item.id,
-                title: item.title,
-                type: destinationCard.type,
-                description: item.description
-            }
-            newCardList[cardIndex].listElement.push(updatedElement);
-
-            // Update the state
-            setCardList(newCardList);
-        } else if (cardIndex === -1) {
-            console.error('Destination card not found');
-        } else {
-            console.error('Invalid move: Source and destination cards are the same.');
-        }
-    };
-    /**
-     * Update the order of the events
-     * FIXME: to improve
-     * @param card
-     * @param element
-     */
-    const orderCardList = (card: CardInterface, element: EventInterface): void => {
-        const sourceCardIndex = cardList.findIndex((c) => c.type === card.type);
-
-        if (sourceCardIndex !== -1) {
-            const sourceCard = cardList[sourceCardIndex];
-
-            const sourceIndex = sourceCard.listElement.findIndex((e) => e.id === element.id);
-            const destinationIndex = sourceCard.listElement.findIndex((e) => e.id === card.id);
-
-            if (sourceIndex < 0 || sourceIndex >= sourceCard.listElement.length) {
-                throw new Error('Invalid operation');
-            }
-
-            if (sourceIndex !== destinationIndex) {
-                const updatedList = [...cardList];
-                const [movedItem] = updatedList[sourceCardIndex].listElement.splice(sourceIndex, 1);
-
-                updatedList[sourceCardIndex].listElement.splice(destinationIndex, 0, movedItem);
-
-                setCardList(updatedList);
-            }
-        }
-    }
-
+    const [cardList, setCardList] = useState<CardInterface[]>(initEvent)
+    const {setTheme, theme} = useTheme()
 
     return (
         <DndProvider backend={HTML5Backend}>
@@ -220,7 +111,7 @@ export default function Home() {
                     {/*    <line x1="4" x2="20" y1="18" y2="18"/>*/}
                     {/*</svg>*/}
                     <h1 className="text-lg font-semibold text-gray-700 dark:text-gray-200">trelloZ</h1>
-                    <Button onClick={()=>{
+                    <Button onClick={() => {
                         setTheme(theme === "system" || theme === "light" ? "dark" : "light");
                     }}> {theme === "light" ? <Sun/> : <Moon/>} </Button>
                 </div>
@@ -234,8 +125,7 @@ export default function Home() {
                     {cardList && cardList.map((card) => (
                         <CardItem key={card.id}
                                   card={card}
-                                  moveCard={moveCard}
-                                  orderCardList={orderCardList}
+                                  setCardList={setCardList}
                                   cardList={cardList}/>
                     ))}
                 </main>
