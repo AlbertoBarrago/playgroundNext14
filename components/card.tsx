@@ -1,4 +1,4 @@
-import {EventInterface} from "../pages/test";
+import {EventInterface} from "../pages";
 import {ConnectDragSource} from "react-dnd";
 
 export default function CardComponent(cardElement: EventInterface) {
