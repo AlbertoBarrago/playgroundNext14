@@ -23,7 +23,7 @@ export interface SingleEventInterface {
 export interface CardListInterface {
     card: CardInterface,
     cardList: CardInterface[],
-    setCardList?: Dispatch<SetStateAction<CardInterface[]>>
+    setCardList: Dispatch<SetStateAction<CardInterface[]>>
 }
 
 export interface ReorderCardListInterface {

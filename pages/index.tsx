@@ -60,7 +60,6 @@ const CardItem: React.FC<CardListInterface> = ({card, setCardList, cardList}) =>
     );
 };
 
-
 /**
  * Event Item
  * @param eCard

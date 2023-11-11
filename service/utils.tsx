@@ -1,4 +1,5 @@
 import {CardInterface, EventInterface} from "../interface/interface";
+import {Dispatch, SetStateAction} from "react";
 
 /**
  * Moves an item to a destination card in a card list.
@@ -10,7 +11,7 @@ import {CardInterface, EventInterface} from "../interface/interface";
  * @param setCardList
  * @returns {void}
  */
-const moveCard = (item: EventInterface, destinationCard: CardInterface, cardList: any, setCardList: any): void => {
+const moveCard = (item: EventInterface, destinationCard: CardInterface, cardList: CardInterface[], setCardList: Dispatch<SetStateAction<CardInterface[]>>): void => {
     const newCardList = [...cardList];
 
     // Determine the sourceCardIndex based on the type of the destination card
@@ -48,7 +49,7 @@ const moveCard = (item: EventInterface, destinationCard: CardInterface, cardList
  * @param cardList
  * @param setCardList
  */
-const orderCardList = (card: CardInterface, element: EventInterface, cardList: any, setCardList: any): void => {
+const orderCardList = (card: CardInterface, element: EventInterface, cardList: CardInterface[], setCardList: Dispatch<SetStateAction<CardInterface[]>>): void => {
     const sourceCardIndex = cardList.findIndex((c: { type: string; }) => c.type === card.type);
 
     if (sourceCardIndex !== -1) {
