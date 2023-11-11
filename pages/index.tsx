@@ -8,7 +8,7 @@ import {Input} from "../@/components/ui/input"
 import {
     CardInterface,
     CardListInterface,
-    EventInterface,
+    EventInterface, eventTypes,
     SingleEventInterface
 } from "../interface/interface";
 import {useTheme} from "next-themes";
@@ -24,7 +24,7 @@ import {moveCard, orderCardList} from "../service/utils";
  * @constructor
  */
 const CardItem: React.FC<CardListInterface> = ({card, setCardList, cardList}) => {
-
+    const [inputValue, setInputValue] = useState<string>('');
     const [, drop] = useDrop(() => ({
         accept: "CARD_COMPONENT",
         item: card,
@@ -37,18 +37,52 @@ const CardItem: React.FC<CardListInterface> = ({card, setCardList, cardList}) =>
             }
         }
     }))
-
-    const addEvent = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const addEvent = (e: React.KeyboardEvent<HTMLInputElement>, card: CardInterface) => {
         console.log(e.currentTarget.value)
+        const updatedCardList = [...cardList];
+        let cardToPopulate: CardInterface[] = cardList.filter(e => e.type === card.type)
+        switch (card.type) {
+            case "TODO":
+                let newEvent: EventInterface = {
+                    id: (Math.random() * 100),
+                    type: "TODO",
+                    title: e.currentTarget.value,
+                    description: ""
+                }
+                cardToPopulate[0].listElement.push(newEvent);
+                setInputValue("")
+                break;
+            case "DOING":
+                break;
+            case "DONE":
+                break;
+        }
+
+        // Find the index of the modified card in the cardList
+        const cardIndex = updatedCardList.findIndex((c) => c.type === card.type);
+
+        // Update the modified card in the cardList
+        updatedCardList[cardIndex] = cardToPopulate[0];
+
+        // Update the state with the modified cardList
+        setCardList(updatedCardList);
     }
 
     return (
-        <Card ref={drop}>
+        <Card ref={drop} className={"bg-gray-300"}>
             <CardHeader>
-                <CardTitle className="text-black">{card.title}</CardTitle>
+                <CardTitle>{card.title}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-                <Input className={"h-14 p-2"} placeholder={" Add Event"} onKeyDown={(e) => addEvent(e)}></Input>
+                <Input className={"h-14 p-2"}
+                       value={inputValue}
+                       onChange={(e) => setInputValue(e.target.value)}
+                       placeholder={"Add Event"}
+                       onKeyDown={(e) => {
+                           if (e.key === 'Enter') {
+                               addEvent(e, card);
+                           }
+                       }}></Input>
                 {card.listElement.map((eCard) => (
                     <EventItem
                         key={eCard.id}
@@ -110,9 +144,10 @@ export default function Home() {
                     {/*    <line x1="4" x2="20" y1="18" y2="18"/>*/}
                     {/*</svg>*/}
                     <h1 className="text-lg font-semibold text-gray-700 dark:text-gray-200">trelloZ</h1>
-                    <Button onClick={() => {
-                        setTheme(theme === "system" || theme === "light" ? "dark" : "light");
-                    }}> {theme === "light" ? <Sun/> : <Moon/>} </Button>
+                    {/*<Button onClick={() => {*/}
+                    {/*    setTheme(theme === "system" || theme === "light" ? "dark" : "light");*/}
+                    {/*}}> {theme === "light" ? <Sun/> : <Moon/>}*/}
+                    {/*</Button>*/}
                 </div>
                 <div className="flex items-center space-x-2">
                     {/*<Button variant="ghost">Sign In</Button>*/}

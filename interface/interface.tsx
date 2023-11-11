@@ -1,9 +1,9 @@
 import {Dispatch, SetStateAction} from "react";
 
-export type type = "TODO" | "DOING" | "DONE";
+export type eventTypes = "TODO" | "DOING" | "DONE";
 export interface EventInterface {
     id: number, //unique id
-    type: type,
+    type: eventTypes,
     title: string;
     description: string;
     comment?: string;
@@ -11,7 +11,7 @@ export interface EventInterface {
 export interface CardInterface {
     id: number;
     title: string;
-    type: type,
+    type: eventTypes,
     visible: boolean;
     listElement: EventInterface[];
 }
