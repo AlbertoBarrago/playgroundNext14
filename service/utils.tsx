@@ -20,7 +20,9 @@ const moveCard = (item: EventInterface, destinationCard: CardInterface, cardList
 
     if (cardIndex !== -1 && sourceCardIndex !== -1) {
         // Remove old items from the origin-array
-        const index = newCardList[sourceCardIndex].listElement.findIndex((event: { id: number; }) => event.id === item.id);
+        const index = newCardList[sourceCardIndex].listElement.findIndex((event: {
+            id: number;
+        }) => event.id === item.id);
         if (index !== -1) {
             newCardList[sourceCardIndex].listElement.splice(index, 1);
         }
@@ -53,24 +55,20 @@ const orderCardList = (card: CardInterface, element: EventInterface, cardList: C
     const sourceCardIndex = cardList.findIndex((c: { type: string; }) => c.type === card.type);
 
     if (sourceCardIndex !== -1) {
-        const sourceCard = cardList[sourceCardIndex];
+        const { listElement } = cardList[sourceCardIndex];
+        const sourceIndex = listElement.findIndex((e: { id: number; }) => e.id === element.id);
 
-        const sourceIndex = sourceCard.listElement.findIndex((e: { id: number; }) => e.id === element.id);
-        const destinationIndex = sourceCard.listElement.findIndex((e: { id: number; }) => e.id === card.id);
-
-        if (sourceIndex < 0 || sourceIndex >= sourceCard.listElement.length) {
-            throw new Error('Invalid operation');
-        }
-
-        if (sourceIndex !== destinationIndex) {
+        if (sourceIndex !== -1) {
             const updatedList = [...cardList];
-            const [movedItem] = updatedList[sourceCardIndex].listElement.splice(sourceIndex, 1);
+            const [movedItem] = listElement.splice(sourceIndex, 1);
 
-            updatedList[sourceCardIndex].listElement.splice(destinationIndex, 0, movedItem);
+            const destinationIndex = sourceIndex === 1 ? 0 : listElement.length;
+            listElement.splice(destinationIndex, 0, movedItem);
 
             setCardList(updatedList);
         }
     }
+
 }
 
 export {
