@@ -143,7 +143,6 @@ export default function Home() {
                 </>
             ) : (
                 <div className="flex items-center justify-center h-full">
-                    {/* You can replace this with your own loading spinner component */}
                     <div className="loader"></div>
                 </div>
             )}
